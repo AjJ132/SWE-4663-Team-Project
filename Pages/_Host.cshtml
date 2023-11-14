@@ -5,6 +5,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,9 +13,12 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="SWE 4663 Team Project.styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    @* <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard-base.css"> *@
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
+
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
@@ -29,6 +33,8 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
     <script src="_framework/blazor.server.js"></script>
 </body>
+
 </html>
