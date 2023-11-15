@@ -9,5 +9,17 @@ namespace TeamProject.Data
         public int MemberID { get; set; }
         [Required, MaxLength(50)]
         public string Name { get; set; }
+
+        //Default Constructor
+        public TeamMember()
+        {
+
+        }
+
+        //DEV CONSTRUCTOR
+        public TeamMember(int na)
+        {
+            Name = "Test Name";
+        }
     }
 }

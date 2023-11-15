@@ -3,3 +3,19 @@
 @namespace TeamProject.Pages
 
 <PageTitle>Home</PageTitle>
+
+@if (!this.IsLoaded)
+{
+    <p><em>Loading</em></p>
+}
+else
+{
+    @if (this.ErrorOccured)
+    {
+        <p>There was an error in loading the database</p>
+    }
+    else
+    {
+        <p>Projects: @this.Projects.Count()</p>
+    }
+}

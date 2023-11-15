@@ -17,5 +17,22 @@ namespace TeamProject.Data
         public int PermissionLevel { get; set; }
         [Required]
         public string PermissionLevelName { get; set; }
+
+
+        //Default Constructor
+        public ProjectTeamMember()
+        {
+
+        }
+
+        //DEV CONSTRICTOR
+        public ProjectTeamMember(int na)
+        {
+            ProjectID = 1;
+            TeamMemberID = 1;
+            TeamMemberName = "Test Name";
+            PermissionLevel = 1;
+            PermissionLevelName = "Member";
+        }
     }
 }

@@ -28,5 +28,22 @@ namespace TeamProject.Data
 
         [Required, MaxLength(250)]
         public string RiskMitigation { get; set; }
+
+        //Default Constructor
+        public Risk()
+        {
+
+        }
+
+        //DEV CONSTRUCTOR
+        public Risk(int na)
+        {
+            ProjectID = 1;
+            RiskName = "Test Risk";
+            RiskDescription = "This is a test risk.";
+            RiskSeverity = 1;
+            RiskStatus = false;
+            RiskMitigation = "Test Mitigation Strategy";
+        }
     }
 }

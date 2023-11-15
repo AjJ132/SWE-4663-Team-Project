@@ -6,6 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Check if database file exists, if not create it
+if (!System.IO.File.Exists("./Database/TeamProjDB.db3"))
+{
+    System.IO.Directory.CreateDirectory("./Database");
+    System.IO.File.Create("./Database/TeamProjDB.db3");
+}
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();

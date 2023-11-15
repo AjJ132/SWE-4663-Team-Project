@@ -9,6 +9,9 @@ namespace TeamProject.Data
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int RequirementId { get; set; }
 
+        [Required]
+        public int ProjectId { get; set; }
+
         [Required, MaxLength(50)]
         public string Title { get; set; }
 
@@ -29,6 +32,24 @@ namespace TeamProject.Data
 
         [MaxLength(500)]
         public string Notes { get; set; }
+
+        //Default Constructor
+        public ProjectRequirement()
+        {
+
+        }
+
+        //DEV CONSTRUCTOR
+        public ProjectRequirement(int na)
+        {
+            Title = "Test Requirement";
+            Description = "This is a test requirement.";
+            Type = RequirementType.Functional;
+            Status = RequirementStatus.Proposed;
+            Priority = "High";
+            EffortEstimation = "1 Week";
+            Notes = "This is a test requirement.";
+        }
     }
 
     public enum RequirementType
