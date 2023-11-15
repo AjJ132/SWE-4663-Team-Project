@@ -36,14 +36,15 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRUCTOR
-        public Risk(int na)
+        public Risk(int projectid, int riskid, string riskname, string riskdescription, int riskseverity, bool riskstatus, string riskmitigation)
         {
-            ProjectID = 1;
-            RiskName = "Test Risk";
-            RiskDescription = "This is a test risk.";
-            RiskSeverity = 1;
-            RiskStatus = false;
-            RiskMitigation = "Test Mitigation Strategy";
+            ProjectID = projectid;
+            RiskID = riskid;
+            RiskName = riskname;
+            RiskDescription = riskdescription;
+            RiskSeverity = riskseverity;
+            RiskStatus = riskstatus;
+            RiskMitigation = riskmitigation;
         }
     }
 }

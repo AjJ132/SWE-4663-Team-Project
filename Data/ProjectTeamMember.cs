@@ -26,13 +26,13 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRICTOR
-        public ProjectTeamMember(int na)
+        public ProjectTeamMember(int projectid, int teammemberid, string teammembername, int permissionlevel, string permissionlevelname)
         {
-            ProjectID = 1;
-            TeamMemberID = 1;
-            TeamMemberName = "Test Name";
-            PermissionLevel = 1;
-            PermissionLevelName = "Member";
+            ProjectID = projectid;
+            TeamMemberID = teammemberid;
+            TeamMemberName = teammembername;
+            PermissionLevel = permissionlevel;
+            PermissionLevelName = permissionlevelname;
         }
     }
 }

@@ -17,9 +17,9 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRUCTOR
-        public TeamMember(int na)
+        public TeamMember(string name)
         {
-            Name = "Test Name";
+            Name = name;
         }
     }
 }

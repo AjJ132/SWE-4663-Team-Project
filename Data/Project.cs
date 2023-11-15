@@ -35,6 +35,14 @@ namespace TeamProject.Data
         [NotMapped]
         public List<LoggedManHours> LoggedManHours { get; set; }
 
+        [NotMapped]
+        public double ProjectCompletion { get; set; }
+        [NotMapped]
+        public int TotalRequirements { get; set; }
+        [NotMapped]
+        public int CompletedRequirements { get; set; }
+        [NotMapped]
+        public int HighPriorityTasks { get; set; }
         //default constructor
         public Project()
         {
@@ -42,13 +50,49 @@ namespace TeamProject.Data
         }
 
         //DEVELOPMENT CONSTRUCTOR
-        public Project(int na)
+        public Project(string name, string description, int projectOwnerID, string projectOwnerName, int projectPhase)
         {
-            this.Name = "Test Project";
-            this.Description = "This is a test project.";
-            this.ProjectOwnerID = 1;
-            this.ProjectOwnerName = "Test Owner";
-            this.ProjectPhase = 0;
+            Name = name;
+            Description = description;
+            ProjectOwnerID = projectOwnerID;
+            ProjectOwnerName = projectOwnerName;
+            ProjectPhase = projectPhase;
+        }
+
+        public void SetProjectStats()
+        {
+            //First Calculate the totla number of requirements
+            this.TotalRequirements = Requirements.Count;
+            Console.WriteLine("Total Requirements: " + this.TotalRequirements);
+
+            //if there are no requirements, set the project completion to 0
+            if (this.TotalRequirements == 0)
+            {
+                ProjectCompletion = 0;
+                CompletedRequirements = 0;
+                this.TotalRequirements = 0;
+            }
+            else
+            {
+                //if there are requirements, calculate the number of completed requirements
+                foreach (var requirement in this.Requirements)
+                {
+                    if (requirement.Status == RequirementStatus.Implemented)
+                    {
+                        this.CompletedRequirements++;
+                    }
+
+                    if(requirement.Priority.Equals("High"))
+                    {
+                        this.HighPriorityTasks++;
+                    }
+                }
+
+                //calculate the project completion percentage
+                this.ProjectCompletion = Math.Round((double)this.CompletedRequirements / this.TotalRequirements * 100, 2);
+
+
+            }
         }
 
     }

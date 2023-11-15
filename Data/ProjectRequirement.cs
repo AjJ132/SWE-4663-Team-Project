@@ -40,15 +40,16 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRUCTOR
-        public ProjectRequirement(int na)
+        public ProjectRequirement(int projectid, string title, string description, RequirementType type, RequirementStatus status, string priority, string effortEstimation, string notes)
         {
-            Title = "Test Requirement";
-            Description = "This is a test requirement.";
-            Type = RequirementType.Functional;
-            Status = RequirementStatus.Proposed;
-            Priority = "High";
-            EffortEstimation = "1 Week";
-            Notes = "This is a test requirement.";
+            ProjectId = projectid;
+            Title = title;
+            Description = description;
+            Type = type;
+            Status = status;
+            Priority = priority;
+            EffortEstimation = effortEstimation;
+            Notes = notes;
         }
     }
 

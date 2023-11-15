@@ -13,9 +13,56 @@ else
     @if (this.ErrorOccured)
     {
         <p>There was an error in loading the database</p>
+        <p>Please press retry.</p>
+        <RadzenButton Text="Retry" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Large"></RadzenButton>
     }
     else
     {
-        <p>Projects: @this.Projects.Count()</p>
+        <RadzenStack>
+            <RadzenStack >
+                <RadzenStack AlignItems="AlignItems.Start" Gap="5px;">
+                    <h1 style="margin-block-end: 0;">Project Tracking</h1>
+                    <h4 style="margin-block-end: 0; ">@DateTime.Today.Date.ToString("ddd MMM yyyy")</h4>
+                </RadzenStack>
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenButton Text="Grid" Size="ButtonSize.Large"/>
+                    <RadzenButton Text="Grid" Size="ButtonSize.Large" />
+                    <RadzenButton Text="Grid" Size="ButtonSize.Large" />
+                </RadzenStack>
+                <div class="divider" />
+            </RadzenStack>
+            @*Page's Main Content*@
+            <RadzenStack>
+                @foreach(var proj in this.Projects)
+                {
+                    <RadzenCard>
+                        <RadzenStack>
+                            <h3>@proj.Name</h3>
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="2rem">
+                                <h5>Total Requirements: @proj.TotalRequirements</h5>
+                                <h5>Percent Complete: @proj.ProjectCompletion%</h5>
+                                <h5>High Priority: @proj.HighPriorityTasks </h5>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            </RadzenStack>
+        </RadzenStack>
     }
 }
+
+
+<style>
+    h1{
+        margin-block-end: 0;
+        margin-block-start: 0;
+        font-weight: 600;
+    }
+
+
+
+    .divider{
+        border-bottom: 3px solid #e0e0e0;
+        margin: 10px 0;
+    }
+</style>

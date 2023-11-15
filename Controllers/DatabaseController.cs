@@ -190,7 +190,26 @@ namespace TeamProject.Controllers
             return loggedManHours;
         }
 
+        //Methods for members
+        //Get all members
+        public async Task<List<TeamMember>> GetTeamMembers()
+        {
+            return await _context.TeamMembers.ToListAsync();
+        }
 
+        //Get member by id
+        public async Task<TeamMember> GetTeamMember(int id)
+        {
+            return await _context.TeamMembers.FindAsync(id);
+        }
+
+        //Add member
+        public async Task<TeamMember> AddTeamMember(TeamMember teamMember)
+        {
+            _context.TeamMembers.Add(teamMember);
+            await _context.SaveChangesAsync();
+            return teamMember;
+        }
 
 
 

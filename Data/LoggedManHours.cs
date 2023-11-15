@@ -31,18 +31,13 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRUCTOR
-        public LoggedManHours(int na, int requirementID)
+        public LoggedManHours(int projectid, int teammemberid, int hours, DateTime date, int requirementid)
         {
-            ProjectID = 1;
-            TeamMemberID = 1;
-            //random number between 1 and 10
-            Random rand = new Random();
-            Hours = rand.Next(1, 10);
-
-            Date = DateTime.Now;
-
-            Date.AddDays(rand.Next(-20, -1));
-            RequirementID = requirementID;
+            ProjectID = projectid;
+            TeamMemberID = teammemberid;
+            Hours = hours;
+            Date = date;
+            RequirementID = requirementid;
         }
     }
 }
