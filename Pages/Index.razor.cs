@@ -20,6 +20,8 @@ namespace TeamProject.Pages
 
 
 
+
+
         //List of lists of dates to fill the ghannt chart
         // public List<DateTime> GanntChartDates { get; set; } = new List<DateTime>();
 
@@ -188,14 +190,14 @@ namespace TeamProject.Pages
             try
             {
                 //loop over each project
-                foreach(var proj in this.Projects)
+                foreach (var proj in this.Projects)
                 {
                     proj.Tasks = new List<TaskModel>();
                     var startDate = proj.ProjectStartDate;
                     var endDate = DateTime.Today;
 
                     List<DateTime> dates = new List<DateTime>();
-                    
+
                     //Fill dates list with each day between start and end date
                     for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
                     {
@@ -210,12 +212,13 @@ namespace TeamProject.Pages
                     var manhours = proj.LoggedManHours;
 
                     //loop over each requirement
-                    foreach(var req in requirements)
+                    foreach (var req in requirements)
                     {
                         var task = new TaskModel
                         {
                             TaskName = req.Title,
-                            Dates = new Dictionary<DateTime, bool>()
+                            Dates = new SortedList<DateTime, bool>(),
+                            Status = req.Status.ToString()
                         };
 
                         //check man hours to see if requirment id match
@@ -224,7 +227,7 @@ namespace TeamProject.Pages
                         //if work isnt empty then find the dates that work took place, add to dictionary and set to true
                         if (work.Count > 0)
                         {
-                            foreach(var w in work)
+                            foreach (var w in work)
                             {
                                 var date = w.Date;
                                 task.Dates.Add(date, true);
@@ -233,7 +236,7 @@ namespace TeamProject.Pages
                         }
 
                         //loop over each date in dates list
-                        foreach(var date in dates)
+                        foreach (var date in dates)
                         {
                             //if the date is not in the dictionary then add it and set to false
                             if (!task.Dates.ContainsKey(date))
@@ -243,7 +246,7 @@ namespace TeamProject.Pages
                         }
 
                         proj.Tasks.Add(task);
-                        
+
                     }
                 }
             }
@@ -260,8 +263,27 @@ namespace TeamProject.Pages
             return true;
         }
 
-        public void ToggleTaskDate(TaskModel task, DateTime date)
+        public void ToggleTaskDate(TaskModel task, DateTime date, int projectID)
         {
+            //First if task is true then toggle off otherwise toggle on
+            var taskModel = task.Dates.Where(x => x.Key == date).FirstOrDefault();
+
+            if (taskModel.Value == true)
+            {
+                task.Dates[date] = false;
+            }
+            else
+            {
+                task.Dates[date] = true;
+            }
+
+            //Update project
+            this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Tasks.Where(x => x.TaskName == task.TaskName).FirstOrDefault().Dates = task.Dates;
+
+            //refresh grid
+            StateHasChanged();
+
+
 
         }
 
@@ -405,7 +427,7 @@ namespace TeamProject.Pages
 
             return true;
         }
-    
+
         private async Task<bool> CreateTestData2()
         {
             try
@@ -554,7 +576,7 @@ namespace TeamProject.Pages
                 var user2 = new TeamMember("Sarah Green");
 
                 // Save all to database (continues with database operations as in CreateTestData)
-                        //Save all to database
+                //Save all to database
                 project3 = await _dbController.AddProject(project3);
                 requirement1 = await _dbController.AddProjectRequirement(requirement1);
 

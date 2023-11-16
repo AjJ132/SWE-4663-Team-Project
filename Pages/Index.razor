@@ -20,21 +20,19 @@ else
     else
     {
         <RadzenStack>
-            <RadzenStack >
-                <RadzenStack AlignItems="AlignItems.Start" Gap="5px;">
-                    <h1 style="margin-block-end: 0;">Project Tracking</h1>
-                    <h4 style="margin-block-end: 0; ">@DateTime.Today.Date.ToString("ddd MMM yyyy")</h4>
-                </RadzenStack>
-                <RadzenStack Orientation="Orientation.Horizontal">
-                    <RadzenButton Text="Grid" Size="ButtonSize.Large"/>
-                    <RadzenButton Text="Grid" Size="ButtonSize.Large" />
-                    <RadzenButton Text="Grid" Size="ButtonSize.Large" />
-                </RadzenStack>
-                <div class="divider" />
-            </RadzenStack>
-            @*Page's Main Content*@
-            <RadzenStack>
-                @foreach(var proj in this.Projects)
+    <RadzenStack>
+        <RadzenStack AlignItems="AlignItems.Start" Gap="5px;">
+            <h1 style="margin-block-end: 0;">Project Tracking</h1>
+            <h4 style="margin-block-end: 0; ">@DateTime.Today.Date.ToString("ddd MMM yyyy")</h4>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal">
+
+        </RadzenStack>
+        <div class="divider" />
+    </RadzenStack>
+    @*Page's Main Content*@
+    <RadzenStack>
+        @foreach (var proj in this.Projects)
                 {
                     <RadzenCard>
                         <RadzenStack>
@@ -44,23 +42,13 @@ else
                                 <h5>Percent Complete: @proj.ProjectCompletion%</h5>
                                 <h5>High Priority Tasks: @proj.HighPriorityTasks </h5>
                             </RadzenStack>
-                            @* <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                                            Data="proj.TeamMembers" TItem="ProjectTeamMember" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
-                                        <Columns>
-                                            <RadzenGridColumn TItem="ProjectTeamMember" Property="TeamMemberName" Title="Name" />
-                                            @foreach(var col in this.GanntChartDates)
-                                            {
-                                                <RadzenGridColumn TItem="DateTime"  Title="Date" />
-                                            }
-                                            
-                                        </Columns>
-                            </RadzenDataGrid> *@
 
                             <div>
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Task / Date</th>
+                                            <th>Task</th>
+                                            <th>Status</th>
                                             @foreach (var date in proj.ProjectDates)
                                             {
                                                 <th>@date.ToShortDateString()</th>
@@ -72,34 +60,20 @@ else
                                         {
                                             <tr>
                                                 <td class="table-cell">@task.TaskName</td>
+                                                <td class="table-cell">@task.Status</td>
                                                 @foreach (var date in task.Dates)
                                                 {
-                                                    if(date.Value == true)
+                                                    @if (date.Value == true)
                                                     {
-                                                        @* <td class="highlighted"></td> *@
-                                                        <td class="highlighted">@this.Projects.FirstOrDefault(p => p.Id == proj.Id)?.TeamMembers.FirstOrDefault(t => t.TeamMemberID == task.UserID)?.TeamMemberName
-    </td>
+                                                        <th class="highlighted" @onclick="(() => ToggleTaskDate(task, date.Key, proj.Id))">
+                                                            @this.Projects.FirstOrDefault(p => p.Id ==
+                                                                     proj.Id)?.TeamMembers.FirstOrDefault(t => t.TeamMemberID ==
+                                                                     task.UserID)?.TeamMemberName </th>
                                                     }
                                                     else
                                                     {
-                                                        <td>NO</td>
+                                                        <th @onclick="(() => ToggleTaskDate(task, date.Key, proj.Id))"></th>
                                                     }
-                                                    
-                                                    @* if (task.Dates.Any(x => x.Key == date && x.Value == true))
-                                                    {
-                                                        <td class="highlighted" >
-                                                            @* @onclick="() => ToggleTaskDate(task, date)" > 
-                                                            @if (task.Dates[date])
-                                                            {
-                                                                <span>✔</span>
-                                                            }  
-                                                            <p>@date</p>
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td>NO</td>
-                                                    } *@
                                                 }
                                             </tr>
                                         }
@@ -116,7 +90,7 @@ else
 
 
 <style>
-    h1{
+    h1 {
         margin-block-end: 0;
         margin-block-start: 0;
         font-weight: 600;
@@ -124,37 +98,41 @@ else
 
 
 
-    .divider{
+    .divider {
         border-bottom: 3px solid #e0e0e0;
         margin: 10px 0;
     }
 
     .highlighted {
-    background-color: rgb(1, 206, 1) !important; /* Or any color you prefer */
-}
+        background-color: rgb(1, 206, 1) !important;
+        text-align: center;
+        /* Or any color you prefer */
+    }
 
-.table-cell {
-    padding: 10px; /* Adjust the value as needed */
-}
+    .table-cell {
+        padding: 10px;
+        /* Adjust the value as needed */
+    }
 
-table {
-     @* border-collapse: separate;  *@
-     border-spacing: 10px; /* Adjust the value as needed */ 
-}
+    table {
+        border-collapse: separate;
 
-/* Style for odd columns */
-tr > td:nth-child(odd), 
-tr > th:nth-child(odd) {
-    background-color: #f2f2f2; /* Light gray color, change as needed */
-}
+        border-spacing: 1px;
 
-/* Style for even columns */
-tr > td:nth-child(even), 
-tr > th:nth-child(even) {
-    background-color: #e7e7e7; /* Slightly darker gray, change as needed */
-}
+    }
 
+    /* Style for odd columns */
+    tr>td:nth-child(odd),
+    tr>th:nth-child(odd) {
+        background-color: #f2f2f2;
 
+        /* Light gray color, change as needed */
+    }
 
-
+    /* Style for even columns */
+    tr>td:nth-child(even),
+    tr>th:nth-child(even) {
+        background-color: #e7e7e7;
+        /* Slightly darker gray, change as needed */
+    }
 </style>
