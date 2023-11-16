@@ -228,6 +228,7 @@ namespace TeamProject.Pages
                             {
                                 var date = w.Date;
                                 task.Dates.Add(date, true);
+                                task.UserID = w.TeamMemberID;
                             }
                         }
 

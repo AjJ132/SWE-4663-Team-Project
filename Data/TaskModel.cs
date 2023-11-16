@@ -4,6 +4,8 @@ namespace TeamProject.Data
     {
         public string TaskName { get; set; }
         public Dictionary<DateTime, bool> Dates { get; set; }
+
+        public int UserID { get; set; }
     }
 
 }

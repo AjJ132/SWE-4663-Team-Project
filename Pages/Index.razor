@@ -71,24 +71,35 @@ else
                                         @foreach (var task in proj.Tasks)
                                         {
                                             <tr>
-                                                <td>@task.TaskName</td>
-                                                @foreach (var date in proj.ProjectDates)
+                                                <td class="table-cell">@task.TaskName</td>
+                                                @foreach (var date in task.Dates)
                                                 {
-                                                    @*if any of the dates from the task match then highlight*@
-                                                    @if (task.Dates.Any(x => x.Key == date))
+                                                    if(date.Value == true)
                                                     {
-                                                        <td class="highlighted" 
-                                                        @onclick="() => ToggleTaskDate(task, date)" > 
-                                                        @if (task.Dates[date])
-                                                        {
-                                                            <span>✔</span>
-                                                        }
-                                                    </td>
+                                                        @* <td class="highlighted"></td> *@
+                                                        <td class="highlighted">@this.Projects.FirstOrDefault(p => p.Id == proj.Id)?.TeamMembers.FirstOrDefault(t => t.TeamMemberID == task.UserID)?.TeamMemberName
+    </td>
                                                     }
                                                     else
                                                     {
-                                                        <td class="NO" ></td>
+                                                        <td>NO</td>
                                                     }
+                                                    
+                                                    @* if (task.Dates.Any(x => x.Key == date && x.Value == true))
+                                                    {
+                                                        <td class="highlighted" >
+                                                            @* @onclick="() => ToggleTaskDate(task, date)" > 
+                                                            @if (task.Dates[date])
+                                                            {
+                                                                <span>✔</span>
+                                                            }  
+                                                            <p>@date</p>
+                                                        </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td>NO</td>
+                                                    } *@
                                                 }
                                             </tr>
                                         }
@@ -119,7 +130,31 @@ else
     }
 
     .highlighted {
-    background-color: yellow; /* Or any color you prefer */
+    background-color: rgb(1, 206, 1) !important; /* Or any color you prefer */
 }
+
+.table-cell {
+    padding: 10px; /* Adjust the value as needed */
+}
+
+table {
+     @* border-collapse: separate;  *@
+     border-spacing: 10px; /* Adjust the value as needed */ 
+}
+
+/* Style for odd columns */
+tr > td:nth-child(odd), 
+tr > th:nth-child(odd) {
+    background-color: #f2f2f2; /* Light gray color, change as needed */
+}
+
+/* Style for even columns */
+tr > td:nth-child(even), 
+tr > th:nth-child(even) {
+    background-color: #e7e7e7; /* Slightly darker gray, change as needed */
+}
+
+
+
 
 </style>
