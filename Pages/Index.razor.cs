@@ -5,6 +5,10 @@ using TeamProject.Controllers;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Radzen.Blazor;
+using Radzen;
+using System.Security.Cryptography;
+using SWE_4663_Team_Project.Pages;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 
 namespace TeamProject.Pages
@@ -15,19 +19,16 @@ namespace TeamProject.Pages
         [Inject]
         private DatabaseController _dbController { get; set; }
 
+        [Inject]
+        private DialogService _dialogService { get; set; }
+
         //Projects in the database
         public List<Project> Projects { get; set; }
 
+        //bool to control dialog box for selecting user
+        public bool ShowUserDialogBox { get; set; } = false;
 
 
-
-
-        //List of lists of dates to fill the ghannt chart
-        // public List<DateTime> GanntChartDates { get; set; } = new List<DateTime>();
-
-
-        //List of custom columns for ghannt chart
-        // public List<RadzenDataGridColumn<ProjectRequirement>> GanntChartColumns { get; set; } = new List<RadzenDataGridColumn<ProjectRequirement>>();
 
         //Bool to check if info is loaded
         public bool IsLoaded { get; set; } = false;
@@ -218,7 +219,8 @@ namespace TeamProject.Pages
                         {
                             TaskName = req.Title,
                             Dates = new SortedList<DateTime, bool>(),
-                            Status = req.Status.ToString()
+                            Status = req.Status.ToString(),
+                            ReqID = req.RequirementId
                         };
 
                         //check man hours to see if requirment id match
@@ -263,30 +265,74 @@ namespace TeamProject.Pages
             return true;
         }
 
-        public void ToggleTaskDate(TaskModel task, DateTime date, int projectID)
+        public async void ToggleTaskDate(TaskModel task, DateTime date, int projectID)
         {
-            //First if task is true then toggle off otherwise toggle on
-            var taskModel = task.Dates.Where(x => x.Key == date).FirstOrDefault();
 
-            if (taskModel.Value == true)
+            Console.WriteLine("Toggle Task Date");
+            //First present user with dialog to select name from dropbox
+            //Gather available users for project and construct dictionary
+
+            var members = this.Projects.Where(x => x.Id == projectID).FirstOrDefault().TeamMembers;
+            var users = new Dictionary<int, string>();
+            users = members.ToDictionary(x => x.TeamMemberID, x => x.TeamMemberName);
+
+            var result = await _dialogService.OpenAsync<UserSelection>("", new Dictionary<string, object>() { { "Users", users } }, new DialogOptions() { Resizable = true, Draggable = true, CloseDialogOnOverlayClick = true });
+            if (result != null && result is Tuple<int, int> selectedUserId)
             {
-                task.Dates[date] = false;
+                selectedUserId = (Tuple<int, int>)result;
+                Console.WriteLine("User Selected: " + users.Where(x => x.Key == selectedUserId.Item1).FirstOrDefault().Value);
+
+                // if task is true then toggle off otherwise toggle on
+                var taskModel = task.Dates.Where(x => x.Key == date).FirstOrDefault();
+
+                if (taskModel.Value == true)
+                {
+                    task.Dates[date] = false;
+                }
+                else
+                {
+                    task.Dates[date] = true;
+                }
+
+                //Update project
+                this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Tasks.Where(x => x.TaskName == task.TaskName).FirstOrDefault().Dates = task.Dates;
+
+                //Update database
+                var manhours = new LoggedManHours(projectID, selectedUserId.Item1, selectedUserId.Item2, date, task.ReqID);
+
+                manhours = await _dbController.AddLoggedManHours(manhours);
+
+                //refresh grid
+                await InvokeAsync(StateHasChanged);
             }
             else
             {
-                task.Dates[date] = true;
+                Console.WriteLine("Exited");
+                return;
             }
 
-            //Update project
-            this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Tasks.Where(x => x.TaskName == task.TaskName).FirstOrDefault().Dates = task.Dates;
 
-            //refresh grid
-            StateHasChanged();
 
 
 
         }
 
+        public async void ToggleRequirementStatus(int reqId, int projectID)
+        {
+            //First identify the requirement
+            var requirement = this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Requirements.Where(x => x.RequirementId == reqId).FirstOrDefault();
+
+            var status = requirement.Status;
+
+            var result = await _dialogService.OpenAsync<StatusSelection>("", new Dictionary<string, object>() { { "Status", status } }, new DialogOptions() { Resizable = true, Draggable = true, CloseDialogOnOverlayClick = true });
+
+            if (result != null && result is RequirementStatus newStatus)
+            {
+                newStatus = (RequirementStatus)result;
+                Console.WriteLine("New Status Selected: " + newStatus.ToString());
+                return;
+            }
+        }
         private async Task<bool> CreateTestData()
         {
             //

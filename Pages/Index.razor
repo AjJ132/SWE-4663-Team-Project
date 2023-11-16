@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inherits IndexBase
 @namespace TeamProject.Pages
+@inject DialogService DialogService
 @using TeamProject.Data
 
 <PageTitle>Home</PageTitle>
@@ -47,11 +48,12 @@ else
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Task</th>
-                                            <th>Status</th>
+                                            <th style="text-align: center;">Task</th>
+                                            <th style="text-align: center;">Status</th>
                                             @foreach (var date in proj.ProjectDates)
                                             {
-                                                <th>@date.ToShortDateString()</th>
+                                                <th>&nbsp;&nbsp;@date.ToShortDateString() &nbsp;&nbsp;</th>
+
                                             }
                                         </tr>
                                     </thead>
@@ -65,7 +67,7 @@ else
                                                 {
                                                     @if (date.Value == true)
                                                     {
-                                                        <th class="highlighted" @onclick="(() => ToggleTaskDate(task, date.Key, proj.Id))">
+                                                        <th class="highlighted" @onclick="((async) => ToggleTaskDate(task, date.Key, proj.Id))">
                                                             @this.Projects.FirstOrDefault(p => p.Id ==
                                                                      proj.Id)?.TeamMembers.FirstOrDefault(t => t.TeamMemberID ==
                                                                      task.UserID)?.TeamMemberName </th>

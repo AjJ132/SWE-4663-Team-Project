@@ -1,0 +1,41 @@
+@inject DialogService DialogService
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <h3>Users</h3>
+            <RadzenDropDown @bind-Value="selectedUser" Data="@Users" TextProperty="Value" ValueProperty="Key" />
+        </RadzenStack>
+        <RadzenStack>
+            <h3>Hours</h3>
+            <RadzenNumeric @bind-Value="hours" Min="1" Max="24" />
+        </RadzenStack>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+        <RadzenButton Text="Confirm" Click="@ConfirmSelection" />
+    </RadzenStack>
+</RadzenStack>
+
+
+
+
+@code {
+    [Parameter]
+    public Dictionary<int, string> Users { get; set; } = new Dictionary<int, string>();
+
+    int selectedUser = 0;
+    int hours = 0;
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    void ConfirmSelection()
+    {
+        var info = new Tuple<int, int>(selectedUser, hours);
+        DialogService.Close(info);
+    }
+}

@@ -7,6 +7,7 @@ namespace TeamProject.Data
 
         public int UserID { get; set; }
         public string Status { get; set; }
+        public int ReqID { get; set; }
     }
 
 }

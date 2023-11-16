@@ -1,0 +1,55 @@
+@inject DialogService DialogService
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <h3>Status</h3>
+            <RadzenDropDown @bind-Value="requirementStatus" Data="@StatusOptions" TextProperty="ToString"
+                ValueProperty="Value" />
+
+        </RadzenStack>
+
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+        <RadzenButton Text="Confirm" Click="@ConfirmSelection" />
+    </RadzenStack>
+</RadzenStack>
+
+
+
+
+@code {
+
+    public enum RequirementStatus
+    {
+        Proposed,
+        Accepted,
+        InProgress,
+        Implemented,
+        Deferred,
+        Rejected
+    }
+    [Parameter]
+    public string Status { get; set; } = "Open";
+
+    private RequirementStatus requirementStatus;
+
+    private List<RequirementStatus> StatusOptions = Enum.GetValues(typeof(RequirementStatus))
+    .Cast<RequirementStatus>()
+    .ToList();
+
+
+
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    void ConfirmSelection()
+    {
+        DialogService.Close(requirementStatus);
+    }
+}

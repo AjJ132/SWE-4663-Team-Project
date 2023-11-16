@@ -2,6 +2,7 @@
 using TeamProject.Controllers;
 
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ if (!System.IO.File.Exists("./Database/TeamProjDB.db3"))
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<DialogService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=Database/TeamProjDB.db3"));
 
