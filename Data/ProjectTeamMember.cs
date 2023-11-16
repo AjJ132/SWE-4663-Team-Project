@@ -18,6 +18,9 @@ namespace TeamProject.Data
         [Required]
         public string PermissionLevelName { get; set; }
 
+        [NotMapped]
+        public Dictionary<DateTime, object> ProjectDates { get; set; } = new Dictionary<DateTime, object>();
+
 
         //Default Constructor
         public ProjectTeamMember()

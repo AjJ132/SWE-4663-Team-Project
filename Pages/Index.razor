@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inherits IndexBase
 @namespace TeamProject.Pages
+@using TeamProject.Data
 
 <PageTitle>Home</PageTitle>
 
@@ -41,8 +42,59 @@ else
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="2rem">
                                 <h5>Total Requirements: @proj.TotalRequirements</h5>
                                 <h5>Percent Complete: @proj.ProjectCompletion%</h5>
-                                <h5>High Priority: @proj.HighPriorityTasks </h5>
+                                <h5>High Priority Tasks: @proj.HighPriorityTasks </h5>
                             </RadzenStack>
+                            @* <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                                            Data="proj.TeamMembers" TItem="ProjectTeamMember" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+                                        <Columns>
+                                            <RadzenGridColumn TItem="ProjectTeamMember" Property="TeamMemberName" Title="Name" />
+                                            @foreach(var col in this.GanntChartDates)
+                                            {
+                                                <RadzenGridColumn TItem="DateTime"  Title="Date" />
+                                            }
+                                            
+                                        </Columns>
+                            </RadzenDataGrid> *@
+
+                            <div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Task / Date</th>
+                                            @foreach (var date in proj.ProjectDates)
+                                            {
+                                                <th>@date.ToShortDateString()</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var task in proj.Tasks)
+                                        {
+                                            <tr>
+                                                <td>@task.TaskName</td>
+                                                @foreach (var date in proj.ProjectDates)
+                                                {
+                                                    @*if any of the dates from the task match then highlight*@
+                                                    @if (task.Dates.Any(x => x.Key == date))
+                                                    {
+                                                        <td class="highlighted" 
+                                                        @onclick="() => ToggleTaskDate(task, date)" > 
+                                                        @if (task.Dates[date])
+                                                        {
+                                                            <span>✔</span>
+                                                        }
+                                                    </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="NO" ></td>
+                                                    }
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </RadzenStack>
                     </RadzenCard>
                 }
@@ -65,4 +117,9 @@ else
         border-bottom: 3px solid #e0e0e0;
         margin: 10px 0;
     }
+
+    .highlighted {
+    background-color: yellow; /* Or any color you prefer */
+}
+
 </style>

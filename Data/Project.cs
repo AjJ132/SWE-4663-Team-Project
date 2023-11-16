@@ -21,6 +21,9 @@ namespace TeamProject.Data
         [Required]
         public int ProjectPhase { get; set; }
 
+        [Required]
+        public DateTime ProjectStartDate { get; set; }
+
 
         //Ignored relationship objects
         [NotMapped]
@@ -43,20 +46,30 @@ namespace TeamProject.Data
         public int CompletedRequirements { get; set; }
         [NotMapped]
         public int HighPriorityTasks { get; set; }
+
+        // [NotMapped] //used for the ghannt chart on home page
+        // public List<CustomGhanntChartColumn> GhanntChartColumns { get; set; }
         //default constructor
+
+        [NotMapped]
+        public List<DateTime> ProjectDates { get; set; } = new List<DateTime>();
+        [NotMapped]
+        public List<TaskModel> Tasks { get; set; } = new List<TaskModel>();
         public Project()
         {
 
         }
 
         //DEVELOPMENT CONSTRUCTOR
-        public Project(string name, string description, int projectOwnerID, string projectOwnerName, int projectPhase)
+        public Project(string name, string description, int projectOwnerID, string projectOwnerName, int projectPhase, DateTime projectStartDate)
         {
             Name = name;
             Description = description;
             ProjectOwnerID = projectOwnerID;
             ProjectOwnerName = projectOwnerName;
             ProjectPhase = projectPhase;
+            ProjectStartDate = projectStartDate;
+            ProjectDates = new List<DateTime>();    
         }
 
         public void SetProjectStats()

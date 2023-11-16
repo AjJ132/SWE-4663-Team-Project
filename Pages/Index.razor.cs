@@ -4,6 +4,7 @@ using TeamProject.Data;
 using TeamProject.Controllers;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Radzen.Blazor;
 
 
 namespace TeamProject.Pages
@@ -17,16 +18,36 @@ namespace TeamProject.Pages
         //Projects in the database
         public List<Project> Projects { get; set; }
 
+
+
+        //List of lists of dates to fill the ghannt chart
+        // public List<DateTime> GanntChartDates { get; set; } = new List<DateTime>();
+
+
+        //List of custom columns for ghannt chart
+        // public List<RadzenDataGridColumn<ProjectRequirement>> GanntChartColumns { get; set; } = new List<RadzenDataGridColumn<ProjectRequirement>>();
+
         //Bool to check if info is loaded
         public bool IsLoaded { get; set; } = false;
         public bool ErrorOccured { get; set; } = false;
         protected override async void OnInitialized()
         {
-            var loadSuccessful = await StartupSequence();
+            var projectsLoadSuccessful = await StartupSequence();
 
-            if (loadSuccessful)
+            if (projectsLoadSuccessful)
             {
-                Console.WriteLine("IndexBase Initialized Successfully");
+                Console.WriteLine("Projects Retrieved from Database.");
+                var ghanntChartDatesSuccessful = CalculateGhanntChartDates();
+
+                if (ghanntChartDatesSuccessful)
+                {
+                    Console.WriteLine("Ghannt Chart Dates Calculated.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to Calculate Ghannt Chart Dates.");
+                    ErrorOccured = true;
+                }
             }
             else
             {
@@ -58,6 +79,7 @@ namespace TeamProject.Pages
                     {
                         var success = await CreateTestData();
                         success = await CreateTestData2();
+                        success = await CreateTestData3();
 
                         if (!success)
                         {
@@ -161,6 +183,87 @@ namespace TeamProject.Pages
             return true;
         }
 
+        private bool CalculateGhanntChartDates()
+        {
+            try
+            {
+                //loop over each project
+                foreach(var proj in this.Projects)
+                {
+                    proj.Tasks = new List<TaskModel>();
+                    var startDate = proj.ProjectStartDate;
+                    var endDate = DateTime.Today;
+
+                    List<DateTime> dates = new List<DateTime>();
+                    
+                    //Fill dates list with each day between start and end date
+                    for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+                    {
+                        dates.Add(dt);
+                        proj.ProjectDates.Add(dt);
+                    }
+
+                    //get all requirements for project
+                    var requirements = proj.Requirements;
+
+                    //Get all manhours for project
+                    var manhours = proj.LoggedManHours;
+
+                    //loop over each requirement
+                    foreach(var req in requirements)
+                    {
+                        var task = new TaskModel
+                        {
+                            TaskName = req.Title,
+                            Dates = new Dictionary<DateTime, bool>()
+                        };
+
+                        //check man hours to see if requirment id match
+                        var work = manhours.Where(x => x.RequirementID == req.RequirementId).ToList();
+
+                        //if work isnt empty then find the dates that work took place, add to dictionary and set to true
+                        if (work.Count > 0)
+                        {
+                            foreach(var w in work)
+                            {
+                                var date = w.Date;
+                                task.Dates.Add(date, true);
+                            }
+                        }
+
+                        //loop over each date in dates list
+                        foreach(var date in dates)
+                        {
+                            //if the date is not in the dictionary then add it and set to false
+                            if (!task.Dates.ContainsKey(date))
+                            {
+                                task.Dates.Add(date, false);
+                            }
+                        }
+
+                        proj.Tasks.Add(task);
+                        
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("There was an issue calculating the Ghannt Chart Dates.");
+                Console.WriteLine(e.Message);
+                Debug.WriteLine("There was an issue calculating the Ghannt Chart Dates.");
+
+                Debug.WriteLine(e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        public void ToggleTaskDate(TaskModel task, DateTime date)
+        {
+
+        }
+
         private async Task<bool> CreateTestData()
         {
             //
@@ -175,7 +278,8 @@ namespace TeamProject.Pages
                     description: "A web-based class registration system for a university.",
                     projectOwnerID: 1,
                     projectOwnerName: "John Doe",
-                    projectPhase: 3
+                    projectPhase: 3,
+                    projectStartDate: DateTime.Now.AddDays(-10)
                 );
 
                 //Create new requirements
@@ -311,7 +415,8 @@ namespace TeamProject.Pages
                     description: "A comprehensive system for managing digital and physical books in a library.",
                     projectOwnerID: 2,
                     projectOwnerName: "Alice Johnson",
-                    projectPhase: 2
+                    projectPhase: 2,
+                    projectStartDate: DateTime.Now.AddDays(-15)
                 );
 
                 // Create new requirements
@@ -398,61 +503,86 @@ namespace TeamProject.Pages
         }
 
         private async Task<bool> CreateTestData3()
-{
-    try
-    {
-        // Create new project
-        var project3 = new Project(
-            name: "Employee Performance Tracking System",
-            description: "A system to track and analyze employee performance metrics in a corporate setting.",
-            projectOwnerID: 3,
-            projectOwnerName: "Bob Smith",
-            projectPhase: 1
-        );
+        {
+            try
+            {
+                // Create new project
+                var project3 = new Project(
+                    name: "Employee Performance Tracking System",
+                    description: "A system to track and analyze employee performance metrics in a corporate setting.",
+                    projectOwnerID: 3,
+                    projectOwnerName: "Bob Smith",
+                    projectPhase: 1,
+                    projectStartDate: DateTime.Now.AddDays(-20)
+                );
 
-        // Create new requirements
-        var requirement1 = new ProjectRequirement(
-            3,
-            title: "Performance Metrics Dashboard",
-            description: "Create a dashboard to display various performance metrics of employees in real-time.",
-            type: RequirementType.Functional,
-            status: RequirementStatus.Proposed,
-            priority: "High",
-            effortEstimation: "35 hours",
-            notes: "Dashboard should be customizable per department."
-        );
+                // Create new requirements
+                var requirement1 = new ProjectRequirement(
+                    3,
+                    title: "Performance Metrics Dashboard",
+                    description: "Create a dashboard to display various performance metrics of employees in real-time.",
+                    type: RequirementType.Functional,
+                    status: RequirementStatus.Proposed,
+                    priority: "High",
+                    effortEstimation: "35 hours",
+                    notes: "Dashboard should be customizable per department."
+                );
 
-        // Create new risks
-        var risk1 = new Risk(
-            projectid: 3,
-            riskid: 301,
-            riskname: "Data Privacy Concerns",
-            riskdescription: "Handling sensitive employee data raises privacy and security concerns.",
-            riskseverity: 5,
-            riskstatus: true,
-            riskmitigation: "Implement robust data encryption and access controls."
-        );
+                // Create new risks
+                var risk1 = new Risk(
+                    projectid: 3,
+                    riskid: 301,
+                    riskname: "Data Privacy Concerns",
+                    riskdescription: "Handling sensitive employee data raises privacy and security concerns.",
+                    riskseverity: 5,
+                    riskstatus: true,
+                    riskmitigation: "Implement robust data encryption and access controls."
+                );
 
-        // Create new manhours
-        var manhours1 = new LoggedManHours(3, 3, 7, DateTime.Now.AddDays(-8), 4);
+                // Create new manhours
+                var manhours1 = new LoggedManHours(3, 3, 7, DateTime.Now.AddDays(-8), 4);
 
-        // Create new members and assign them
-        var teamMember1 = new ProjectTeamMember(projectid: 3, teammemberid: 6, teammembername: "Bob Smith", permissionlevel: 3, permissionlevelname: "Project Owner");
-        var teamMember2 = new ProjectTeamMember(projectid: 3, teammemberid: 7, teammembername: "Sarah Green", permissionlevel: 2, permissionlevelname: "Project Manager");
+                // Create new members and assign them
+                var teamMember1 = new ProjectTeamMember(projectid: 3, teammemberid: 6, teammembername: "Bob Smith", permissionlevel: 3, permissionlevelname: "Project Owner");
+                var teamMember2 = new ProjectTeamMember(projectid: 3, teammemberid: 7, teammembername: "Sarah Green", permissionlevel: 2, permissionlevelname: "Project Manager");
 
-        // Reuse members from CreateTestData
-        var teamMember3 = new ProjectTeamMember(projectid: 3, teammemberid: 2, teammembername: "Jane Doe", permissionlevel: 1, permissionlevelname: "Team Member");
+                // Reuse members from CreateTestData
+                var teamMember3 = new ProjectTeamMember(projectid: 3, teammemberid: 2, teammembername: "Jane Doe", permissionlevel: 1, permissionlevelname: "Team Member");
 
-        // Save all to database (continues with database operations as in CreateTestData)
-        // ...
-    }
-    catch (Exception e)
-    {
-        // Exception handling
-        return false;
-    }
-    return true;
-}
+                var user1 = new TeamMember("Bob Smith");
+                var user2 = new TeamMember("Sarah Green");
+
+                // Save all to database (continues with database operations as in CreateTestData)
+                        //Save all to database
+                project3 = await _dbController.AddProject(project3);
+                requirement1 = await _dbController.AddProjectRequirement(requirement1);
+
+                risk1 = await _dbController.AddRisk(risk1);
+
+                manhours1 = await _dbController.AddLoggedManHours(manhours1);
+
+                teamMember1 = await _dbController.AddProjectTeamMember(teamMember1);
+                teamMember2 = await _dbController.AddProjectTeamMember(teamMember2);
+                teamMember3 = await _dbController.AddProjectTeamMember(teamMember3);
+
+                user1 = await _dbController.AddTeamMember(user1);
+                user2 = await _dbController.AddTeamMember(user2);
+
+
+                project3.ProjectOwnerID = user1.MemberID;
+
+                //update project with new owner
+                project3 = await _dbController.UpdateProject(project3);
+            }
+            catch (Exception e)
+            {
+                // Exception handling
+                Console.WriteLine("There was an issue creating test data.");
+                Debug.WriteLine("There was an issue creating test data.");
+                return false;
+            }
+            return true;
+        }
 
     }
 }
