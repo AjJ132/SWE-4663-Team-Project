@@ -1,0 +1,76 @@
+@inject DialogService DialogService
+@using TeamProject.Data;
+
+
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <p>New Requirement</p>
+            <RadzenTextBox @bind-Value="ProjectRequirement.Title" />
+
+            <p>Description</p>
+            <RadzenTextBox @bind-Value="ProjectRequirement.Description" />
+
+            <p>Functional Or Non Functional </p>
+            <RadzenSelectBar @bind-Value=@fVNF TValue="bool" class="mb-5">
+                <Items>
+                    <RadzenSelectBarItem Text="Functional" Value="true" />
+                    <RadzenSelectBarItem Text="Non-Functional" Value="false" />
+                </Items>
+            </RadzenSelectBar>
+
+            <p>Priority</p>
+            <RadzenDropDown @bind-Value="this.priority" Data="@priorityOptions" />
+        </RadzenStack>
+
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+        <RadzenButton Text="Confirm" Click="@ConfirmSelection" />
+    </RadzenStack>
+</RadzenStack>
+
+
+
+@code {
+    [Parameter]
+    public ProjectRequirement ProjectRequirement { get; set; }
+
+    private bool fVNF = true;
+    public List<string> priorityOptions = new List<string>()
+{
+"Low",
+"Medium",
+"High"
+};
+
+    public string priority { get; set; } = "Low";
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    void ConfirmSelection()
+    {
+        if (fVNF)
+        {
+            ProjectRequirement.Type = RequirementType.Functional;
+        }
+        else
+        {
+            ProjectRequirement.Type = RequirementType.NonFunctional;
+        }
+
+        this.ProjectRequirement.EffortEstimation = "zero";
+
+        this.ProjectRequirement.Priority = priority;
+        this.ProjectRequirement.Notes = "";
+        this.ProjectRequirement.Status = RequirementStatus.Proposed;
+
+
+        DialogService.Close(ProjectRequirement);
+    }
+}

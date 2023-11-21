@@ -1,0 +1,63 @@
+@inject DialogService DialogService
+@using TeamProject.Controllers;
+@inject DatabaseController _dbController;
+@using TeamProject.Data;
+
+
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <RadzenStack>
+                <h4>Create New Member</h4>
+                <p>Name</p>
+                <RadzenTextBox @bind-Value="TeamMember.Name" />
+                <RadzenButton Text="Create" Click="@ConfirmSelectionCreate" />
+
+            </RadzenStack>
+            <p>Or</p>
+            <RadzenStack>
+                <p>Select Existing</p>
+                <RadzenDropDown @bind-Value="selectedMember" Data="@TeamMembers" TextProperty="Name" />
+                <RadzenButton Text="Add" Click="@ConfirmSelectionUpdate" />
+            </RadzenStack>
+        </RadzenStack>
+
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+    </RadzenStack>
+</RadzenStack>
+
+
+
+@code {
+    [Parameter]
+    public TeamMember TeamMember { get; set; }
+
+    private TeamMember selectedMember { get; set; } = new TeamMember();
+
+    public List<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+
+    protected override async void OnInitialized()
+    {
+        TeamMembers = await _dbController.GetTeamMembers();
+    }
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    void ConfirmSelectionCreate()
+    {
+        TeamMember.MemberID = -1;
+        DialogService.Close(this.TeamMember);
+    }
+
+    void ConfirmSelectionUpdate()
+    {
+        DialogService.Close(this.selectedMember);
+    }
+}

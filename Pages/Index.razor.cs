@@ -15,6 +15,9 @@ namespace TeamProject.Pages
 {
     public class IndexBase : ComponentBase
     {
+        [Inject]
+        private NotificationService _notificationService { get; set; }
+
         //DB Controller
         [Inject]
         private DatabaseController _dbController { get; set; }
@@ -118,7 +121,8 @@ namespace TeamProject.Pages
                         if (requirements == null)
                         {
                             Console.WriteLine("Failed to load requirements for project: " + proj.Name);
-                            return false;
+                            //set default requirements
+                            proj.Requirements = new List<ProjectRequirement>();
                         }
                         else
                         {
@@ -134,7 +138,7 @@ namespace TeamProject.Pages
                         if (members == null)
                         {
                             Console.WriteLine("Failed to load members for project: " + proj.Name);
-                            return false;
+                            proj.TeamMembers = new List<ProjectTeamMember>();
                         }
                         else
                         {
@@ -149,7 +153,7 @@ namespace TeamProject.Pages
                         if (risks == null)
                         {
                             Console.WriteLine("Failed to load risks for project: " + proj.Name);
-                            return false;
+                            proj.Risks = new List<Risk>();
                         }
                         else
                         {
@@ -164,7 +168,7 @@ namespace TeamProject.Pages
                         if (manhours == null)
                         {
                             Console.WriteLine("Failed to load manhours for project: " + proj.Name);
-                            return false;
+                            proj.LoggedManHours = new List<LoggedManHours>();
                         }
                         else
                         {
@@ -179,15 +183,13 @@ namespace TeamProject.Pages
                         if (projectPhaseHours == null)
                         {
                             Console.WriteLine("Failed to load project phase hours for project: " + proj.Name);
-                            return false;
+                            proj.ProjectPhaseHours = new ProjectPhaseHours();
                         }
                         else
                         {
                             //load project phase hours into project
                             proj.ProjectPhaseHours = projectPhaseHours;
                         }
-
-
 
                         //Set Project Stats
                         proj.SetProjectStats();
@@ -352,6 +354,214 @@ namespace TeamProject.Pages
                 newStatus = (RequirementStatus)result;
                 Console.WriteLine("New Status Selected: " + newStatus.ToString());
                 return;
+            }
+        }
+
+        public async void CreateNewRequirement(int projectID)
+        {
+            var ProjectRequirement = new ProjectRequirement();
+            ProjectRequirement.ProjectId = projectID;
+            var result = await _dialogService.OpenAsync<AddRequirement>("Add Requirement", new Dictionary<string, object>() { { "ProjectRequirement", ProjectRequirement } }, new DialogOptions() { Width = "600px", Height = "600px" });
+            if (result != null && result is ProjectRequirement newRequirement)
+            {
+                newRequirement = (ProjectRequirement)result;
+                Console.WriteLine("New Requirement Created: " + newRequirement.Title);
+
+                //Add to database
+                newRequirement = await _dbController.AddProjectRequirement(newRequirement);
+
+                //Add to project
+                this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Requirements.Add(newRequirement);
+
+                //refresh grid
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        public async void UpdateRequrementStatus(int projectId, int requirementID)
+        {
+            string status = this.Projects.Where(n => n.Id == projectId).FirstOrDefault().Requirements.Where(x => x.RequirementId == requirementID).FirstOrDefault().Status.ToString();
+
+            var result = await _dialogService.OpenAsync<StatusSelection>("Status", new Dictionary<string, object>() { { "Status", status } }, new DialogOptions() { Resizable = true, Draggable = true, CloseDialogOnOverlayClick = true });
+
+            if (result != null && result is RequirementStatus newStatus)
+            {
+                newStatus = (RequirementStatus)result;
+                Console.WriteLine("New Status Selected: " + newStatus.ToString());
+
+                //Update database
+                var requirement = this.Projects.Where(n => n.Id == projectId).FirstOrDefault().Requirements.Where(x => x.RequirementId == requirementID).FirstOrDefault();
+                requirement.Status = newStatus;
+                requirement = await _dbController.UpdateProjectRequirement(requirement);
+
+                //Update project
+                this.Projects.Where(n => n.Id == projectId).FirstOrDefault().Requirements.Where(x => x.RequirementId == requirementID).FirstOrDefault().Status = newStatus;
+
+                //refresh grid
+                await InvokeAsync(StateHasChanged);
+
+                //Notify User to refresh screen
+                _notificationService.Notify(new NotificationMessage()
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Refresh Required",
+                    Detail = "Please refresh the page to see the updated status."
+                });
+            }
+        }
+
+        public async void UpdateOrAddRisk(int projectID, int riskID)
+        {
+            if (riskID == -1)
+            {
+                //add risk
+                var risk = new Risk();
+                risk.ProjectID = projectID;
+
+                var result = await _dialogService.OpenAsync<AddRisk>("AddRisk", new Dictionary<string, object>() { { "Risk", risk } }, new DialogOptions() { Width = "600px", Height = "600px" });
+
+                if (result != null && result is Risk newRisk)
+                {
+                    newRisk = (Risk)result;
+                    Console.WriteLine("New Risk Created: " + newRisk.RiskName);
+                    newRisk.RiskID = this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.LastOrDefault().RiskID + 1;
+
+                    //Add to database
+                    newRisk = await _dbController.AddRisk(newRisk);
+
+                    //Add to project
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Add(newRisk);
+
+                    //refresh grid
+                    await InvokeAsync(StateHasChanged);
+
+                    //Notify User to refresh screen
+                    _notificationService.Notify(new NotificationMessage()
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Refresh Required",
+                        Detail = "Please refresh the page to see the updated status."
+                    });
+                }
+
+            }
+            else
+            {
+                //update risk
+
+                var risk = this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault();
+
+                var result = await _dialogService.OpenAsync<AddRisk>("AddRisk", new Dictionary<string, object>() { { "Risk", risk } }, new DialogOptions() { Width = "600px", Height = "600px" });
+                if (result != null && result is Risk newRisk)
+                {
+                    newRisk = (Risk)result;
+                    Console.WriteLine("New Risk Created: " + newRisk.RiskName);
+
+                    //Update database
+                    newRisk = await _dbController.UpdateRisk(newRisk);
+
+                    //Update project
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault().RiskName = newRisk.RiskName;
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault().RiskDescription = newRisk.RiskDescription;
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault().RiskSeverity = newRisk.RiskSeverity;
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault().RiskStatus = newRisk.RiskStatus;
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Risks.Where(x => x.RiskID == riskID).FirstOrDefault().RiskMitigation = newRisk.RiskMitigation;
+
+                    //refresh grid
+                    await InvokeAsync(StateHasChanged);
+
+                    //Notify User to refresh screen
+                    _notificationService.Notify(new NotificationMessage()
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Refresh Required",
+                        Detail = "Please refresh the page to see the updated status."
+                    });
+                }
+            }
+        }
+
+        public async void CreateNewTeamMember(int projectID)
+        {
+            var teamMember = new TeamMember();
+            var result = await _dialogService.OpenAsync<CreateMembers>("Add Team Member", new Dictionary<string, object>() { { "TeamMember", teamMember } }, new DialogOptions() { Width = "600px", Height = "600px" });
+            if (result != null && result is TeamMember newTeamMember)
+            {
+                newTeamMember = (TeamMember)result;
+                Console.WriteLine("New Team Member Created: " + newTeamMember.Name);
+
+                if (newTeamMember.MemberID == -1)
+                {
+                    //create new team member
+                    //add to database
+                    newTeamMember = await _dbController.AddTeamMember(newTeamMember);
+
+                    //prompt to refresh page
+                    _notificationService.Notify(new NotificationMessage()
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Refresh Required",
+                        Detail = "Please refresh the page to see the updated status."
+                    });
+
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    var ProjectTeamMember = new ProjectTeamMember(projectID, newTeamMember, 1);
+
+                    //add to database
+                    ProjectTeamMember = await _dbController.AddProjectTeamMember(ProjectTeamMember);
+
+                    //add to project
+                    this.Projects.Where(x => x.Id == projectID).FirstOrDefault().TeamMembers.Add(ProjectTeamMember);
+
+                    //prompt to refresh page
+                    _notificationService.Notify(new NotificationMessage()
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Refresh Required",
+                        Detail = "Please refresh the page to see the updated status."
+                    });
+                }
+            }
+        }
+
+        public async void CreateNewProject()
+        {
+            var newProj = new Project();
+            var result = await _dialogService.OpenAsync<NewProject>("Create Project", new Dictionary<string, object>() { { "Project", newProj } }, new DialogOptions() { Width = "600px", Height = "600px" });
+
+            if (result != null && result is Project project)
+            {
+                project = (Project)result;
+                Console.WriteLine("New Project Created: " + project.Name);
+
+                // //add to database
+                // project = await _dbController.AddProject(project);
+
+                //add to projects
+                this.Projects.Add(project);
+
+                //prompt to refresh page
+                _notificationService.Notify(new NotificationMessage()
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Refresh Required",
+                    Detail = "Please refresh the page to see the updated status."
+                });
+
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                //Notify User project creation was cancelled
+                _notificationService.Notify(new NotificationMessage()
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Project Creation Cancelled",
+                    Detail = "Project Creation Was Cancelled."
+                });
             }
         }
         private async Task<bool> CreateTestData()
@@ -760,7 +970,6 @@ namespace TeamProject.Pages
 
         public void UpdateProjectPhaseHours(int projectID)
         {
-            Console.WriteLine("Update Project Phase Hours");
             var project = this.Projects.Where(x => x.Id == projectID).FirstOrDefault();
             var projectPhaseHours = project.ProjectPhaseHours;
             _dbController.UpdateProjectPhaseHours(projectPhaseHours);

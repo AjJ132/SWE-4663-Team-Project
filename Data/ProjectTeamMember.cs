@@ -37,5 +37,28 @@ namespace TeamProject.Data
             PermissionLevel = permissionlevel;
             PermissionLevelName = permissionlevelname;
         }
+
+        public ProjectTeamMember(int projectID, TeamMember teamMember, int permissionLevel)
+        {
+            ProjectID = projectID;
+            TeamMemberID = teamMember.MemberID;
+            TeamMemberName = teamMember.Name;
+            PermissionLevel = permissionLevel;
+            switch (permissionLevel)
+            {
+                case 3:
+                    PermissionLevelName = "Project Owner";
+                    break;
+                case 2:
+                    PermissionLevelName = "Project Manager";
+                    break;
+                case 1:
+                    PermissionLevelName = "Team Member";
+                    break;
+                default:
+                    PermissionLevelName = "Team Member";
+                    break;
+            }
+        }
     }
 }

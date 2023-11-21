@@ -3,6 +3,7 @@ using TeamProject.Controllers;
 
 using Microsoft.EntityFrameworkCore;
 using Radzen;
+using Radzen.Blazor;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=Database/TeamProjDB.db3"));
+
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddScoped<DatabaseController>();
 

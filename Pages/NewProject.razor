@@ -1,0 +1,82 @@
+@inject DialogService DialogService
+@using TeamProject.Controllers;
+@inject DatabaseController _dbController;
+@using TeamProject.Data;
+@inject NotificationService NotificationService
+
+
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <p>Project Name</p>
+            <RadzenTextBox @bind-Value="@Project.Name" MaxLength="49" />
+
+            <p>Project Description</p>
+            <RadzenTextArea @bind-Value="@Project.Description" MaxLength="499" />
+
+            <RadzenStack>
+                <p>Select Owner</p>
+                <RadzenDropDown @bind-Value="selectedMember" Data="@TeamMembers" TextProperty="Name" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+        <RadzenButton Text="Save" Click="@ConfirmSelectionCreate" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public Project Project { get; set; }
+
+    private TeamMember selectedMember { get; set; } = new TeamMember();
+    public List<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+    protected override async void OnInitialized()
+    {
+        TeamMembers = await _dbController.GetTeamMembers();
+
+    }
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    async void ConfirmSelectionCreate()
+    {
+        if(selectedMember == null)
+        {
+            //notify user to select a member
+            NotificationService.Notify(NotificationSeverity.Error, $"Error", $"Please select a member to be the owner of the project.", 5000);
+        }
+        else
+        {
+            Project.ProjectOwnerID = selectedMember.MemberID;
+            Project.ProjectOwnerName = selectedMember.Name;
+            Project.ProjectStartDate = DateTime.Now.AddDays(-1);
+
+
+            //add project to database
+            this.Project = await _dbController.AddProject(Project);
+
+
+            var newOwner = new ProjectTeamMember();
+            newOwner.ProjectID = Project.Id;
+            newOwner.TeamMemberID = selectedMember.MemberID;
+            newOwner.TeamMemberName = selectedMember.Name;
+            newOwner.PermissionLevel = 3;
+            newOwner.PermissionLevelName = "Project Owner";
+
+            //add to database
+            await _dbController.AddProjectTeamMember(newOwner);
+            Console.WriteLine("Added new owner to database");
+
+
+            DialogService.Close(Project);
+        }
+    }
+
+
+}

@@ -5,10 +5,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SWE_4663_Team_Project</RootNamespace>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0"/>
     <PackageReference Include="Radzen.Blazor" Version="4.21.0"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1"/>
+  </ItemGroup>
+
+  <!-- Include SQLite database file in the publish output -->
+  <ItemGroup>
+    <None Update="TeamProjDB.db3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

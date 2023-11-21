@@ -1,0 +1,91 @@
+@inject DialogService DialogService
+@using TeamProject.Data;
+
+
+
+<RadzenStack style="width: 100%;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenStack>
+            <p>Risk Name</p>
+            <RadzenTextBox @bind-Value="Risk.RiskName" />
+
+            <p>Description</p>
+            <RadzenTextBox @bind-Value="Risk.RiskDescription" />
+
+            <p>Severity</p>
+            <RadzenNumeric @bind-Value="Risk.RiskSeverity" Min="1" Max="5" />
+
+            @if (Update)
+            {
+                <p>Status</p>
+                <RadzenSelectBar @bind-Value=@Risk.RiskStatus TValue="bool">
+                    <Items>
+                        <RadzenSelectBarItem Text="Open" Value="true" />
+                        <RadzenSelectBarItem Text="Mitigated" Value="false" />
+                    </Items>
+                </RadzenSelectBar>
+            }
+
+            <p>Mitigation Stratgey</p>
+            <RadzenTextArea @bind-Value="Risk.RiskMitigation" MaxLength="249" />
+        </RadzenStack>
+
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Exit" Click="@CloseDialog" />
+        @if (Update)
+        {
+            <RadzenButton Text="Update" Click="@ConfirmSelection" />
+        }
+        else
+        {
+            <RadzenButton Text="Add" Click="@ConfirmSelection" />
+        }
+    </RadzenStack>
+</RadzenStack>
+
+
+
+@code {
+    [Parameter]
+    public Risk Risk { get; set; }
+
+    [Parameter]
+    public bool Update { get; set; } = false;
+
+
+    protected override void OnInitialized()
+    {
+        if (Risk.RiskID != 0)
+        {
+            Update = true;
+        }
+        else
+        {
+            Update = false;
+        }
+
+        base.OnInitialized();
+    }
+
+    void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+
+    void ConfirmSelection()
+    {
+        @if (Update)
+        {
+            Risk.RiskStatus = true;
+        }
+        else
+        {
+            Risk.RiskStatus = false;
+        }
+
+
+        DialogService.Close(this.Risk);
+    }
+}

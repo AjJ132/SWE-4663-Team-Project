@@ -265,7 +265,7 @@ namespace TeamProject.Controllers
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //DB Connection string
-            optionsBuilder.UseSqlite("Data Source=Database/TeamProjDB.db3");
+            optionsBuilder.UseSqlite("Data Source=./TeamProjDB.db3");
 
 
         }

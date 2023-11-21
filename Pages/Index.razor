@@ -21,21 +21,22 @@ else
     else
     {
         <RadzenStack>
-    <RadzenStack>
-        <RadzenStack AlignItems="AlignItems.Start" Gap="5px;">
-            <h1 style="margin-block-end: 0;">Project Tracking</h1>
-            <h4 style="margin-block-end: 0; ">@DateTime.Today.Date.ToString("ddd MMM yyyy")</h4>
-        </RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal">
+            <RadzenStack>
+                <RadzenStack AlignItems="AlignItems.Start" Gap="5px;">
+                    <h1 style="margin-block-end: 0;">Project Tracking</h1>
+                    <h4 style="margin-block-end: 0; ">@DateTime.Today.Date.ToString("ddd MMM yyyy")</h4>
+                    <RadzenButton Text="New Project" Size="ButtonSize.Large" ButtonStyle="ButtonStyle.Primary"  Click="@(() => CreateNewProject())"/>
+                </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal">
 
+            </RadzenStack>
+            <div class="divider" />
         </RadzenStack>
-        <div class="divider" />
-    </RadzenStack>
-    @*Page's Main Content*@
-    <RadzenStack>
+    
+    <RadzenStack >
         @foreach (var proj in this.Projects)
                 {
-                    <RadzenCard>
+                    <RadzenCard Style="border-radius: 25px;  " class="rz-card-custom">
                         <RadzenStack>
                             <h3>@proj.Name</h3>
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="2rem">
@@ -55,6 +56,7 @@ else
                                 <RadzenStack Gap="0" style="width: 80%;">
                                     <p>Members</p>
                                     <div class="divider" style="margin-top: 0;" />
+                                    <RadzenButton Text="Add Member" ButtonStyle="ButtonStyle.Success" Click="@(() => this.CreateNewTeamMember(proj.Id))" Size="ButtonSize.Large" style="max-width: 175px; margin-bottom: 25px;" />
 
                                     <RadzenDataGrid TItem="ProjectTeamMember" Data="@proj.TeamMembers" AllowPaging="true"
                                         style="max-width: 600px;" AllowSorting="true" PageSize="5">
@@ -123,8 +125,9 @@ else
                             <RadzenStack Gap="0">
                                 <p>Risks</p>
                                 <div class="divider" style="margin-top: 0;" />
+                                <RadzenButton Text="Add Risk" ButtonStyle="ButtonStyle.Success" Click="@(() => this.UpdateOrAddRisk(proj.Id, -1))" Size="ButtonSize.Large" style="max-width: 150px;"/>
 
-                                <RadzenDataGrid @ref="this.RisksGrid" TItem="Risk" Data="@proj.Risks" AllowPaging="true" AllowSorting="true" PageSize="5" EditMode="DataGridEditMode.Single" RowUpdate="@RiskRowUpdate">
+                                <RadzenDataGrid style="margin-top: 25px;" @ref="this.RisksGrid" TItem="Risk" Data="@proj.Risks" AllowPaging="true" AllowSorting="true" PageSize="5" EditMode="DataGridEditMode.Single" RowUpdate="@RiskRowUpdate">
                                     <Columns>
                                         @* <RadzenDataGridColumn TItem="Risk" Context="risk" Title="Edit/Delete" Filterable="false" Sortable="false"  Width="125px">
                                             <Template Context="risk">
@@ -142,8 +145,14 @@ else
                                                 </RadzenButton>
                                             </EditTemplate>
                                         </RadzenDataGridColumn> *@
+                                        <RadzenDataGridColumn TItem="Risk" Title="Update" Width="100px">
+                                            <Template Context="r">
+                                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => UpdateOrAddRisk(proj.Id, r.RiskID))"/>
+                                            </Template>
+                                        </RadzenDataGridColumn>
                                         <RadzenDataGridColumn TItem="Risk" Property="RiskID" Title="ID" Width="75px" />
                                         <RadzenDataGridColumn TItem="Risk" Property="RiskName" Title="Risk" Width="200px" />
+                                        <RadzenDataGridColumn TItem="Risk" Property="RiskSeverity" Title="Severity" Width="90px" />
                                         <RadzenDataGridColumn TItem="Risk" Property="RiskDescription" Title="Description" />
                                         <RadzenDataGridColumn TItem="Risk" Title="Status" Width="100px">
                                             <Template Context="risk">
@@ -167,6 +176,7 @@ else
                         <RadzenStack Gap="0">
                                 <p>Requirements</p>
                                 <div class="divider" style="margin-top: 0;" />
+                                <RadzenButton Text="Add Requirement" ButtonStyle="ButtonStyle.Success" Click="@(() => this.CreateNewRequirement(proj.Id))" Size="ButtonSize.Large" style="max-width: 225px;"/>
                             <div style="margin-top: 1rem;">
                                 <table>
                                     <thead>
@@ -185,7 +195,7 @@ else
                                         {
                                             <tr>
                                                 <td class="table-cell">@task.TaskName</td>
-                                                <td class="table-cell">@task.Status</td>
+                                                <td class="table-cell" @onclick="(() =>  UpdateRequrementStatus(proj.Id, task.ReqID))">@task.Status</td>
                                                 @foreach (var date in task.Dates)
                                                 {
                                                     @if (date.Value == true)
@@ -269,5 +279,9 @@ else
 
     .edit-btn:hover {
         scale: 1.2;
+    }
+
+    .rz-card-custom{
+        box-shadow: 20 20 20 20 rgba(0, 0, 0, 0.5) !important;
     }
 </style>
