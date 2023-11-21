@@ -190,6 +190,14 @@ namespace TeamProject.Controllers
             return loggedManHours;
         }
 
+        //Get Logged man hours by project ID and employee ID
+        public async Task<int> GetLoggedManHoursByProjIDAndEmpID(int projectID, int empID)
+        {
+            var hours = await _context.LoggedManHours.Where(lmh => lmh.ProjectID == projectID && lmh.TeamMemberID == empID).ToListAsync();
+            return hours.Sum(x => x.Hours);
+
+        }
+
         //Methods for members
         //Get all members
         public async Task<List<TeamMember>> GetTeamMembers()
@@ -211,6 +219,25 @@ namespace TeamProject.Controllers
             return teamMember;
         }
 
+        public async Task<ProjectPhaseHours> AddProjectPhaseHours(ProjectPhaseHours projectPhaseHours)
+        {
+            _context.ProjectPhaseHours.Add(projectPhaseHours);
+            await _context.SaveChangesAsync();
+            return projectPhaseHours;
+        }
+
+        public async Task<ProjectPhaseHours> UpdateProjectPhaseHours(ProjectPhaseHours projectPhaseHours)
+        {
+            _context.Entry(projectPhaseHours).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return projectPhaseHours;
+        }
+
+        public async Task<ProjectPhaseHours> GetProjectPhaseHoursByProjID(int projectID)
+        {
+            return await _context.ProjectPhaseHours.Where(x => x.ProjectID == projectID).FirstOrDefaultAsync();
+        }
+
 
 
 
@@ -227,6 +254,7 @@ namespace TeamProject.Controllers
         public DbSet<LoggedManHours> LoggedManHours { get; set; }
         public DbSet<Risk> Risks { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
+        public DbSet<ProjectPhaseHours> ProjectPhaseHours { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -261,6 +289,9 @@ namespace TeamProject.Controllers
 
             modelBuilder.Entity<TeamMember>()
                 .ToTable("TeamMembers");
+
+            modelBuilder.Entity<ProjectPhaseHours>()
+                .ToTable("ProjectPhaseHours");
 
         }
     }

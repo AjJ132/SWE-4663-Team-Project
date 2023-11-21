@@ -46,6 +46,8 @@ namespace TeamProject.Data
         public int CompletedRequirements { get; set; }
         [NotMapped]
         public int HighPriorityTasks { get; set; }
+        [NotMapped]
+        public ProjectPhaseHours ProjectPhaseHours { get; set; }
 
         // [NotMapped] //used for the ghannt chart on home page
         // public List<CustomGhanntChartColumn> GhanntChartColumns { get; set; }
@@ -69,7 +71,7 @@ namespace TeamProject.Data
             ProjectOwnerName = projectOwnerName;
             ProjectPhase = projectPhase;
             ProjectStartDate = projectStartDate;
-            ProjectDates = new List<DateTime>();    
+            ProjectDates = new List<DateTime>();
         }
 
         public void SetProjectStats()
@@ -95,7 +97,7 @@ namespace TeamProject.Data
                         this.CompletedRequirements++;
                     }
 
-                    if(requirement.Priority.Equals("High"))
+                    if (requirement.Priority.Equals("High"))
                     {
                         this.HighPriorityTasks++;
                     }

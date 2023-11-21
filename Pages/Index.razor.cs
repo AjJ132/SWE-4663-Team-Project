@@ -28,6 +28,10 @@ namespace TeamProject.Pages
         //bool to control dialog box for selecting user
         public bool ShowUserDialogBox { get; set; } = false;
 
+        public RadzenDataGrid<Risk> RisksGrid { get; set; }
+        public Risk RiskToUpdate { get; set; }
+        public Risk RiskToInsert { get; set; }
+
 
 
         //Bool to check if info is loaded
@@ -168,6 +172,23 @@ namespace TeamProject.Pages
                             proj.LoggedManHours = manhours;
                         }
 
+                        //project phase hours
+                        var projectPhaseHours = await _dbController.GetProjectPhaseHoursByProjID(proj.Id);
+
+                        //null check
+                        if (projectPhaseHours == null)
+                        {
+                            Console.WriteLine("Failed to load project phase hours for project: " + proj.Name);
+                            return false;
+                        }
+                        else
+                        {
+                            //load project phase hours into project
+                            proj.ProjectPhaseHours = projectPhaseHours;
+                        }
+
+
+
                         //Set Project Stats
                         proj.SetProjectStats();
                         Console.WriteLine("Project Stats Set for: " + proj.Name);
@@ -298,7 +319,7 @@ namespace TeamProject.Pages
                 this.Projects.Where(x => x.Id == projectID).FirstOrDefault().Tasks.Where(x => x.TaskName == task.TaskName).FirstOrDefault().Dates = task.Dates;
 
                 //Update database
-                var manhours = new LoggedManHours(projectID, selectedUserId.Item1, selectedUserId.Item2, date, task.ReqID);
+                var manhours = new LoggedManHours(projectID, selectedUserId.Item1, selectedUserId.Item2, date, task.ReqID, "Implementation");
 
                 manhours = await _dbController.AddLoggedManHours(manhours);
 
@@ -422,9 +443,11 @@ namespace TeamProject.Pages
 
 
                 //Create new manhours
-                var manhours1 = new LoggedManHours(1, 1, 3, DateTime.Now.AddDays(-5), 1);
-                var manhours2 = new LoggedManHours(1, 3, 5, DateTime.Now.AddDays(-4), 2);
-                var manhours3 = new LoggedManHours(1, 1, 2, DateTime.Now.AddDays(-3), 1);
+                var manhours1 = new LoggedManHours(1, 1, 3, DateTime.Now.AddDays(-5), 1, "Design");
+                var manhours2 = new LoggedManHours(1, 3, 5, DateTime.Now.AddDays(-4), 2, "Development");
+                var manhours3 = new LoggedManHours(1, 1, 2, DateTime.Now.AddDays(-3), 1, "Implementation");
+
+                var projectPhaseHours1 = new ProjectPhaseHours(1, 1, 4, 3, 2, 1);
 
                 //Create new members and assign them
                 var teamMember1 = new ProjectTeamMember(projectid: 1, teammemberid: 1, teammembername: "John Doe", permissionlevel: 3, permissionlevelname: "Project Owner");
@@ -448,6 +471,8 @@ namespace TeamProject.Pages
                 manhours1 = await _dbController.AddLoggedManHours(manhours1);
                 manhours2 = await _dbController.AddLoggedManHours(manhours2);
                 manhours3 = await _dbController.AddLoggedManHours(manhours3);
+
+                projectPhaseHours1 = await _dbController.AddProjectPhaseHours(projectPhaseHours1);
 
                 teamMember1 = await _dbController.AddProjectTeamMember(teamMember1);
                 teamMember2 = await _dbController.AddProjectTeamMember(teamMember2);
@@ -523,8 +548,10 @@ namespace TeamProject.Pages
                 );
 
                 // Create new manhours
-                var manhours1 = new LoggedManHours(2, 2, 4, DateTime.Now.AddDays(-7), 2);
-                var manhours2 = new LoggedManHours(2, 4, 6, DateTime.Now.AddDays(-6), 3);
+                var manhours1 = new LoggedManHours(2, 2, 4, DateTime.Now.AddDays(-7), 2, "Design");
+                var manhours2 = new LoggedManHours(2, 4, 6, DateTime.Now.AddDays(-6), 3, "Development");
+
+                var projectPhaseHours2 = new ProjectPhaseHours(2, 2, 4, 3, 2, 1);
 
                 // Create new members and assign them
                 var teamMember1 = new ProjectTeamMember(projectid: 2, teammemberid: 4, teammembername: "Alice Johnson", permissionlevel: 3, permissionlevelname: "Project Owner");
@@ -546,6 +573,8 @@ namespace TeamProject.Pages
 
                 manhours1 = await _dbController.AddLoggedManHours(manhours1);
                 manhours2 = await _dbController.AddLoggedManHours(manhours2);
+
+                projectPhaseHours2 = await _dbController.AddProjectPhaseHours(projectPhaseHours2);
 
                 teamMember1 = await _dbController.AddProjectTeamMember(teamMember1);
                 teamMember2 = await _dbController.AddProjectTeamMember(teamMember2);
@@ -609,7 +638,7 @@ namespace TeamProject.Pages
                 );
 
                 // Create new manhours
-                var manhours1 = new LoggedManHours(3, 3, 7, DateTime.Now.AddDays(-8), 4);
+                var manhours1 = new LoggedManHours(3, 3, 7, DateTime.Now.AddDays(-8), 4, "Design");
 
                 // Create new members and assign them
                 var teamMember1 = new ProjectTeamMember(projectid: 3, teammemberid: 6, teammembername: "Bob Smith", permissionlevel: 3, permissionlevelname: "Project Owner");
@@ -617,6 +646,8 @@ namespace TeamProject.Pages
 
                 // Reuse members from CreateTestData
                 var teamMember3 = new ProjectTeamMember(projectid: 3, teammemberid: 2, teammembername: "Jane Doe", permissionlevel: 1, permissionlevelname: "Team Member");
+
+                var projectPhaseHours3 = new ProjectPhaseHours(3, 3, 4, 3, 2, 1);
 
                 var user1 = new TeamMember("Bob Smith");
                 var user2 = new TeamMember("Sarah Green");
@@ -629,6 +660,8 @@ namespace TeamProject.Pages
                 risk1 = await _dbController.AddRisk(risk1);
 
                 manhours1 = await _dbController.AddLoggedManHours(manhours1);
+
+                projectPhaseHours3 = await _dbController.AddProjectPhaseHours(projectPhaseHours3);
 
                 teamMember1 = await _dbController.AddProjectTeamMember(teamMember1);
                 teamMember2 = await _dbController.AddProjectTeamMember(teamMember2);
@@ -653,5 +686,84 @@ namespace TeamProject.Pages
             return true;
         }
 
+        public async Task UpdateDescription(string description, int projectID)
+        {
+            var project = this.Projects.Where(x => x.Id == projectID).FirstOrDefault();
+            project.Description = description;
+            await _dbController.UpdateProject(project);
+        }
+
+        public int GetTotalManHours(int empID, int projectID)
+        {
+            var hours = _dbController.GetLoggedManHoursByProjIDAndEmpID(projectID, empID);
+            return hours.Result;
+        }
+
+        void RiskReset()
+        {
+            RiskToInsert = null;
+            RiskToUpdate = null;
+        }
+
+        public async Task RiskRowUpdate(Risk newRisk)
+        {
+            await _dbController.UpdateRisk(newRisk);
+
+            //refecth risks
+            var risks = await _dbController.GetRisksByProjectID(newRisk.ProjectID);
+
+            //update project
+            this.Projects.Where(x => x.Id == newRisk.ProjectID).FirstOrDefault().Risks = risks;
+
+            //refresh grid
+            await InvokeAsync(StateHasChanged);
+        }
+
+        public async Task RiskEditRow(Risk risk)
+        {
+            RiskToUpdate = risk;
+            await RisksGrid.EditRow(risk);
+        }
+
+        public async void OnRiskRowUpdate(Risk risk)
+        {
+            RiskReset();
+
+            await _dbController.UpdateRisk(risk);
+        }
+
+        public async Task RiskDeleteRow(Risk risk)
+        {
+            await _dbController.DeleteRisk(risk.RiskID);
+
+            //refecth risks
+            var risks = await _dbController.GetRisksByProjectID(risk.ProjectID);
+
+            //update project
+            this.Projects.Where(x => x.Id == risk.ProjectID).FirstOrDefault().Risks = risks;
+
+            //refresh grid
+            await InvokeAsync(StateHasChanged);
+        }
+
+        public async Task RiskSaveRow(Risk risk)
+        {
+            await RisksGrid.UpdateRow(risk);
+        }
+
+        public async Task RiskCancelEdit(Risk risk)
+        {
+            RiskReset();
+
+            RisksGrid.CancelEditRow(risk);
+        }
+
+        public void UpdateProjectPhaseHours(int projectID)
+        {
+            Console.WriteLine("Update Project Phase Hours");
+            var project = this.Projects.Where(x => x.Id == projectID).FirstOrDefault();
+            var projectPhaseHours = project.ProjectPhaseHours;
+            _dbController.UpdateProjectPhaseHours(projectPhaseHours);
+        }
     }
 }

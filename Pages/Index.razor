@@ -43,8 +43,131 @@ else
                                 <h5>Percent Complete: @proj.ProjectCompletion%</h5>
                                 <h5>High Priority Tasks: @proj.HighPriorityTasks </h5>
                             </RadzenStack>
+                            <RadzenStack Gap="0">
+                                <p>Description</p>
+                                <div class="divider" style="margin-top: 0;" />
 
-                            <div>
+                                <RadzenTextArea @bind-Value="@proj.Description"
+                                    Change="(() => UpdateDescription(proj.Description, proj.Id))" style="max-width: 500px;" />
+
+                            </RadzenStack>
+                            <RadzenStack Orientation="Orientation.Horizontal">
+                                <RadzenStack Gap="0" style="width: 80%;">
+                                    <p>Members</p>
+                                    <div class="divider" style="margin-top: 0;" />
+
+                                    <RadzenDataGrid TItem="ProjectTeamMember" Data="@proj.TeamMembers" AllowPaging="true"
+                                        style="max-width: 600px;" AllowSorting="true" PageSize="5">
+                                        <Columns>
+                                            <RadzenDataGridColumn TItem="ProjectTeamMember" Property="TeamMemberID" Title="ID"
+                                                Width="50px" />
+                                            <RadzenDataGridColumn TItem="ProjectTeamMember" Property="PermissionLevelName"
+                                                Title="Role" />
+                                            <RadzenDataGridColumn TItem="ProjectTeamMember" Property="TeamMemberName" Title="Name" />
+                                            <RadzenDataGridColumn TItem="ProjectTeamMember" Title="Total Hours Worked">
+                                                <Template Context="teamMember">
+                                                    <p>@GetTotalManHours(teamMember.TeamMemberID, proj.Id)</p>
+                                                </Template>
+                                            </RadzenDataGridColumn>
+
+                                        </Columns>
+                                    </RadzenDataGrid>
+                                </RadzenStack>
+
+                                 <RadzenStack Gap="0" style="width: 100%;">
+                                    <p>Project Phases Total Hours</p>
+                                    <div class="divider" style="margin-top: 0;" />
+
+                                    <RadzenStack Orientation="Orientation.Horizontal" Gap="3rem" Style="width: 100%; ">
+                                        
+                                      
+                                            <RadzenStack Gap="0">
+                                               <RadzenStack Gap="0">
+                                                    <p>Requirements Analysis</p>
+                                                    <RadzenStack Orientation="Orientation.Horizontal">
+                                                        <RadzenNumeric Min="0" Max="1000" @bind-Value="proj.ProjectPhaseHours.ReqAnaHrs" Style="width:100px;" />
+                                                       
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                                <RadzenStack Gap="0">
+                                                    <p>Designing</p>
+                                                    <RadzenNumeric Min="0" Max="1000" @bind-Value="proj.ProjectPhaseHours.DesignHrs" Style="width:100px" />
+                                                </RadzenStack>
+                                                <RadzenStack Gap="0">
+                                                    <p>Coding</p>
+                                                    <RadzenNumeric Min="0" Max="1000" @bind-Value="proj.ProjectPhaseHours.CodingHrs" Style="width:100px" />
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                            <RadzenStack Gap="0">
+                                                <RadzenStack Gap="0">
+                                                    <p>Testing</p>
+                                                    <RadzenNumeric Min="0" Max="1000" @bind-Value="proj.ProjectPhaseHours.TestingHrs" Style="width:100px" />
+                                                </RadzenStack>
+                                                <RadzenStack Gap="0">
+                                                    <p>Project Management</p>
+                                                    <RadzenNumeric Min="0" Max="1000" @bind-Value="proj.ProjectPhaseHours.ProjManaHrs" Style="width:100px" />
+                                                </RadzenStack>
+                                                <RadzenStack Gap="0">
+                                                    <p>Save</p>
+                                                   <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Save" Click="@(() => UpdateProjectPhaseHours(proj.Id))" />
+                                                </RadzenStack>
+                                            </RadzenStack>
+
+                                              
+                                   
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+
+                            <RadzenStack Gap="0">
+                                <p>Risks</p>
+                                <div class="divider" style="margin-top: 0;" />
+
+                                <RadzenDataGrid @ref="this.RisksGrid" TItem="Risk" Data="@proj.Risks" AllowPaging="true" AllowSorting="true" PageSize="5" EditMode="DataGridEditMode.Single" RowUpdate="@RiskRowUpdate">
+                                    <Columns>
+                                        @* <RadzenDataGridColumn TItem="Risk" Context="risk" Title="Edit/Delete" Filterable="false" Sortable="false"  Width="125px">
+                                            <Template Context="risk">
+                                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => RiskEditRow(risk))">
+                                                </RadzenButton>
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => RiskDeleteRow(risk))" >
+                                                </RadzenButton>
+                                            </Template>
+                                            <EditTemplate Context="risk">
+                                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => RiskSaveRow(risk))">
+                                                </RadzenButton>
+                                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => RiskCancelEdit(risk))">
+                                                </RadzenButton>
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => RiskDeleteRow(risk))">
+                                                </RadzenButton>
+                                            </EditTemplate>
+                                        </RadzenDataGridColumn> *@
+                                        <RadzenDataGridColumn TItem="Risk" Property="RiskID" Title="ID" Width="75px" />
+                                        <RadzenDataGridColumn TItem="Risk" Property="RiskName" Title="Risk" Width="200px" />
+                                        <RadzenDataGridColumn TItem="Risk" Property="RiskDescription" Title="Description" />
+                                        <RadzenDataGridColumn TItem="Risk" Title="Status" Width="100px">
+                                            <Template Context="risk">
+                                                @if (risk.RiskStatus == true)
+                                                {
+                                                    <p style="color: green;">Mitigated</p>
+                                                }
+                                                else
+                                                {
+                                                    <p style="color: red;">Open</p>
+                                                }
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="Risk" Property="RiskMitigation" Title="Mitigation Stratgey" />
+
+                                    </Columns>
+                                </RadzenDataGrid>
+
+                            </RadzenStack>
+
+                        <RadzenStack Gap="0">
+                                <p>Requirements</p>
+                                <div class="divider" style="margin-top: 0;" />
+                            <div style="margin-top: 1rem;">
                                 <table>
                                     <thead>
                                         <tr>
@@ -82,6 +205,7 @@ else
                                     </tbody>
                                 </table>
                             </div>
+                            </RadzenStack>
                         </RadzenStack>
                     </RadzenCard>
                 }
@@ -136,5 +260,14 @@ else
     tr>th:nth-child(even) {
         background-color: #e7e7e7;
         /* Slightly darker gray, change as needed */
+    }
+
+    .edit-btn {
+        cursor: pointer;
+        transform: all 0.5s ease-in-out;
+    }
+
+    .edit-btn:hover {
+        scale: 1.2;
     }
 </style>

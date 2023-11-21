@@ -24,6 +24,8 @@ namespace TeamProject.Data
 
         public int RequirementID { get; set; }
 
+        public string Phase { get; set; }
+
         //Default Constructor
         public LoggedManHours()
         {
@@ -31,13 +33,14 @@ namespace TeamProject.Data
         }
 
         //DEV CONSTRUCTOR
-        public LoggedManHours(int projectid, int teammemberid, int hours, DateTime date, int requirementid)
+        public LoggedManHours(int projectid, int teammemberid, int hours, DateTime date, int requirementid, string phase)
         {
             ProjectID = projectid;
             TeamMemberID = teammemberid;
             Hours = hours;
             Date = date;
             RequirementID = requirementid;
+            Phase = phase;
         }
     }
 }
